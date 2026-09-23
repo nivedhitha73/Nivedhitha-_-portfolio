@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      app-layer CSP: locks down script/style/connect sources.
+      In production, set this as a real HTTP header (server/CDN), not just
+      a meta tag — the header can't be stripped by an injected script.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+                script-src 'self';
+                style-src 'self' 'unsafe-inline';
+                img-src 'self' data:;
+                connect-src 'self' https://api.yourapp.com;
+                frame-ancestors 'none';
+                base-uri 'self';
+                form-action 'self';"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FSD Secure App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/index.tsx"></script>
+  </body>
+</html>

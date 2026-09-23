@@ -1,0 +1,6 @@
+body { font-family: system-ui, sans-serif; margin: 0; }
+.centered { max-width: 360px; margin: 10vh auto; }
+.app-header { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #ddd; }
+form { display: flex; flex-direction: column; gap: 0.5rem; }
+.error { color: #b91c1c; }
+.btn { padding: 0.5rem 1rem; cursor: pointer; }
