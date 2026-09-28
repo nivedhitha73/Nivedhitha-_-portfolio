@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Booking App</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
+        header { background: #e91e63; color: white; padding: 18px; text-align: center; }
+        .page { display: none; padding: 25px; }
+        .active { display: block; }
+        .movies { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .movie-card { background: white; width: 250px; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px #bbb; }
+        .movie-card h2 { margin-top: 5px; }
+        button { padding: 12px 20px; margin: 8px; border: none; border-radius: 5px; background: #e91e63; color: white; cursor: pointer; font-size: 15px; }
+        button:hover { opacity: 0.85; }
+        .back { background: #555; }
+        .shows button { background: #673ab7; }
+        .seats { display: grid; grid-template-columns: repeat(5, 55px); gap: 10px; justify-content: center; margin: 25px; }
+        .seat { background: #ddd; color: black; }
+        .seat.selected { background: #4caf50; color: white; }
+        .seat.booked { background: #777; color: white; cursor: not-allowed; }
+        .form-box { background: white; max-width: 400px; margin: auto; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px #bbb; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .success { text-align: center; color: green; }
+        .booking-details { background: white; max-width: 450px; margin: auto; padding: 25px; border-radius: 10px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+
+<header><h1>🎬 Movie Booking App</h1></header>
+
+<section id="homePage" class="page active">
+    <h2>Select a Movie</h2>
+    <div class="movies">
+        <div class="movie-card">
+            <h2>Avatar 3</h2><p>English</p><p>Action | Adventure</p>
+            <button onclick="selectMovie('Avatar 3')">Book Now</button>
+        </div>
+        <div class="movie-card">
+            <h2>RRR</h2><p>Telugu</p><p>Action | Drama</p>
+            <button onclick="selectMovie('RRR')">Book Now</button>
+        </div>
+        <div class="movie-card">
+            <h2>Pushpa 2</h2><p>Telugu</p><p>Action</p>
+            <button onclick="selectMovie('Pushpa 2')">Book Now</button>
+        </div>
+    </div>
+</section>
+
+<section id="showPage" class="page">
+    <h2>Select Show Time</h2>
+    <h3 id="selectedMovie"></h3>
+    <div class="shows">
+        <button onclick="selectShow('10:00 AM')">10:00 AM</button>
+        <button onclick="selectShow('1:00 PM')">1:00 PM</button>
+        <button onclick="selectShow('4:00 PM')">4:00 PM</button>
+        <button onclick="selectShow('7:00 PM')">7:00 PM</button>
+    </div>
+    <button class="back" onclick="showPage('homePage')">← Back</button>
+</section>
+
+<section id="seatPage" class="page">
+    <h2>Select Your Seats</h2>
+    <p id="showDetails"></p>
+    <div class="seats">
+        <button class="seat booked">A1</button><button class="seat">A2</button><button class="seat">A3</button><button class="seat">A4</button><button class="seat">A5</button>
+        <button class="seat">B1</button><button class="seat booked">B2</button><button class="seat">B3</button><button class="seat">B4</button><button class="seat">B5</button>
+        <button class="seat">C1</button><button class="seat">C2</button><button class="seat">C3</button><button class="seat">C4</button><button class="seat">C5</button>
+        <button class="seat">D1</button><button class="seat">D2</button><button class="seat">D3</button><button class="seat">D4</button><button class="seat">D5</button>
+    </div>
+    <h3 id="seatCount">Selected Seats: 0</h3>
+    <h3 id="totalPrice">Total: ₹0</h3>
+    <button onclick="goToPayment()">Continue to Payment</button>
+    <button class="back" onclick="showPage('showPage')">← Back</button>
+</section>
+
+<section id="paymentPage" class="page">
+    <div class="form-box">
+        <h2>💳 Payment</h2>
+        <p id="paymentMovie"></p><p id="paymentShow"></p><p id="paymentSeats"></p><h3 id="paymentAmount"></h3>
+        <input type="text" id="customerName" placeholder="Enter your name">
+        <input type="text" id="cardNumber" placeholder="Enter card number" maxlength="16">
+        <input type="text" id="expiry" placeholder="MM/YY">
+        <input type="password" id="cvv" placeholder="CVV" maxlength="3">
+        <button onclick="makePayment()">Pay Now</button>
+        <button class="back" onclick="showPage('seatPage')">← Back</button>
+    </div>
+</section>
+
+<section id="successPage" class="page">
+    <div class="booking-details">
+        <div class="success"><h1>🎉 Booking Successful!</h1></div>
+        <h3>Booking Details</h3>
+        <p><b>Movie:</b> <span id="finalMovie"></span></p>
+        <p><b>Show:</b> <span id="finalShow"></span></p>
+        <p><b>Seats:</b> <span id="finalSeats"></span></p>
+        <p><b>Amount:</b> ₹<span id="finalAmount"></span></p>
+        <p><b>Name:</b> <span id="finalName"></span></p>
+        <p>Booking ID: <b id="bookingId"></b></p>
+        <center><button onclick="closeBooking()">Close Booking</button></center>
+    </div>
+</section>
+
+<script>
+let selectedMovie = "";
+let selectedShow = "";
+let selectedSeats = [];
+const ticketPrice = 250;
+
+function showPage(pageId) {
+    const pages = document.querySelectorAll(".page");
+    pages.forEach(function(page) { page.classList.remove("active"); });
+    document.getElementById(pageId).classList.add("active");
+}
+
+function selectMovie(movie) {
+    selectedMovie = movie;
+    document.getElementById("selectedMovie").innerHTML = "Selected Movie: " + selectedMovie;
+    showPage("showPage");
+}
+
+function selectShow(show) {
+    selectedShow = show;
+    document.getElementById("showDetails").innerHTML =
+        "Movie: " + selectedMovie + " | Show: " + selectedShow;
+    showPage("seatPage");
+}
+
+const seats = document.querySelectorAll(".seat:not(.booked)");
+
+seats.forEach(function(seat) {
+    seat.addEventListener("click", function() {
+        const seatNumber = seat.innerText;
+
+        if (seat.classList.contains("selected")) {
+            seat.classList.remove("selected");
+            selectedSeats = selectedSeats.filter(function(item) {
+                return item !== seatNumber;
+            });
+        } else {
+            seat.classList.add("selected");
+            selectedSeats.push(seatNumber);
+        }
+        updateSeatDetails();
+    });
+});
+
+function updateSeatDetails() {
+    document.getElementById("seatCount").innerHTML =
+        "Selected Seats: " + selectedSeats.length;
+    const total = selectedSeats.length * ticketPrice;
+    document.getElementById("totalPrice").innerHTML = "Total: ₹" + total;
+}
+
+function goToPayment() {
+    if (selectedSeats.length === 0) {
+        alert("Please select at least one seat.");
+        return;
+    }
+
+    const total = selectedSeats.length * ticketPrice;
+    document.getElementById("paymentMovie").innerHTML = "Movie: " + selectedMovie;
+    document.getElementById("paymentShow").innerHTML = "Show: " + selectedShow;
+    document.getElementById("paymentSeats").innerHTML = "Seats: " + selectedSeats.join(", ");
+    document.getElementById("paymentAmount").innerHTML = "Total Amount: ₹" + total;
+    showPage("paymentPage");
+}
+
+function makePayment() {
+    const name = document.getElementById("customerName").value;
+    const card = document.getElementById("cardNumber").value;
+    const expiry = document.getElementById("expiry").value;
+    const cvv = document.getElementById("cvv").value;
+
+    if (name === "" || card === "" || expiry === "" || cvv === "") {
+        alert("Please enter all payment details.");
+        return;
+    }
+
+    if (card.length !== 16) {
+        alert("Please enter a valid 16-digit card number.");
+        return;
+    }
+
+    if (cvv.length !== 3) {
+        alert("Please enter a valid CVV.");
+        return;
+    }
+
+    document.getElementById("finalMovie").innerHTML = selectedMovie;
+    document.getElementById("finalShow").innerHTML = selectedShow;
+    document.getElementById("finalSeats").innerHTML = selectedSeats.join(", ");
+    document.getElementById("finalAmount").innerHTML = selectedSeats.length * ticketPrice;
+    document.getElementById("finalName").innerHTML = name;
+
+    const id = "BMS" + Math.floor(Math.random() * 1000000);
+    document.getElementById("bookingId").innerHTML = id;
+
+    showPage("successPage");
+}
+
+function closeBooking() {
+    alert("Thank you! Your booking is complete.");
+    showPage("homePage");
+
+    selectedMovie = "";
+    selectedShow = "";
+    selectedSeats = [];
+
+    seats.forEach(function(seat) {
+        seat.classList.remove("selected");
+    });
+
+    updateSeatDetails();
+}
+</script>
+</body>
+</html>
